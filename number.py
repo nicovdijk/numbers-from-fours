@@ -1,106 +1,107 @@
 from typing import Dict, Optional
 
-MAX_NUMBER_TO_SHOW = 50
-MAX_NUMBER_TO_STORE = 100
-MAX_NUMBER_OF_FOURS = 5
+MAXIMUM_GETAL_OM_TE_LATEN_ZIEN = 50
+MINIMUM_GETAL_VOOR_OPSLAAN = -1000
+MAXIMUM_GETAL_VOOR_OPSLAAN = 1000
+MAXIMUM_AANTAL_VIEREN = 5
 
 
-FORMULAS: Dict[int, str] = {}
-NUMBER_OF_FOURS: Dict[int, int] = {}
-NEW_FORMULAS: Dict[int, str] = {4: "4", 44: "44"}
-NEW_NUMBER_OF_FOURS: Dict[int, int] = {4: 1, 44: 2}
+FORMULES: Dict[int, str] = {}
+AANTAL_VIEREN: Dict[int, int] = {}
+NIEUWE_FORMULES: Dict[int, str] = {4: "4", 44: "44", 444: "444"}
+NIEUWE_AANTAL_VIEREN: Dict[int, int] = {4: 1, 44: 2, 444: 3}
 
 
-def try_plus(number_1: int, number_2: int) -> None:
-    try_add_number(number_1, "+", number_2, number_1 + number_2)
+def probeer_plus(getal_1: int, getal_2: int) -> None:
+    probeer_getal_toevoegen(getal_1, "+", getal_2, getal_1 + getal_2)
 
 
-def try_minus(number_1: int, number_2: int) -> None:
-    try_add_number(number_1, "-", number_2, number_1 - number_2)
+def probeer_min(getal_1: int, getal_2: int) -> None:
+    probeer_getal_toevoegen(getal_1, "-", getal_2, getal_1 - getal_2)
 
 
-def try_times(number_1: int, number_2: int) -> None:
-    try_add_number(number_1, "*", number_2, number_1 * number_2)
+def probeer_keer(getal_1: int, getal_2: int) -> None:
+    probeer_getal_toevoegen(getal_1, "*", getal_2, getal_1 * getal_2)
 
 
-def try_divide(number_1: int, number_2: int) -> None:
-    if number_2 < 1e-9:
+def probeer_delen(getal_1: int, getal_2: int) -> None:
+    if abs(getal_2) < 1e-9:
         return
-    try_add_number(number_1, "/", number_2, number_1 / number_2)
+    probeer_getal_toevoegen(getal_1, "/", getal_2, getal_1 / getal_2)
 
 
-def try_add_number(number_1, operation, number_2, new_number) -> None:
-    if not is_valid_number(new_number):
+def probeer_getal_toevoegen(getal_1, operatie, getal_2, nieuw_getal) -> None:
+    if not is_geldig_getal(nieuw_getal):
         return
-    new_integer = try_cast_to_integer(new_number)
-    if new_integer is None:
+    heel_getal = probeer_heel_getal_te_maken(nieuw_getal)
+    if heel_getal is None:
         return
-    new_number_of_fours = NUMBER_OF_FOURS[number_1] + NUMBER_OF_FOURS[number_2]
-    if new_number_of_fours >= current_number_of_fours(new_integer):
+    nieuw_aantal_vieren = AANTAL_VIEREN[getal_1] + AANTAL_VIEREN[getal_2]
+    if nieuw_aantal_vieren >= oud_aantal_vieren(heel_getal):
         return
-    formula = f"({FORMULAS[number_1]} {operation} {FORMULAS[number_2]})"
-    # formula = f"({number_1} {operation} {number_2})"
-    NEW_FORMULAS[new_integer] = formula
-    NEW_NUMBER_OF_FOURS[new_integer] = new_number_of_fours
+    formule = f"({FORMULES[getal_1]} {operatie} {FORMULES[getal_2]})"
+    # formule = f"({getal_1} {operatie} {getal_2})"
+    NIEUWE_FORMULES[heel_getal] = formule
+    NIEUWE_AANTAL_VIEREN[heel_getal] = nieuw_aantal_vieren
 
 
-def current_number_of_fours(number: int) -> int:
-    number_of_fours = NEW_NUMBER_OF_FOURS.get(number)
-    if number_of_fours is None:
-        number_of_fours = NUMBER_OF_FOURS.get(number)
-    if number_of_fours is None:
-        number_of_fours = MAX_NUMBER_OF_FOURS + 1
-    return number_of_fours
+def oud_aantal_vieren(getal: int) -> int:
+    aantal_vieren = NIEUWE_AANTAL_VIEREN.get(getal)
+    if aantal_vieren is None:
+        aantal_vieren = AANTAL_VIEREN.get(getal)
+    if aantal_vieren is None:
+        aantal_vieren = MAXIMUM_AANTAL_VIEREN + 1
+    return aantal_vieren
 
 
-def is_valid_number(number: float) -> bool:
-    return 0 < number < MAX_NUMBER_TO_STORE
+def is_geldig_getal(getal: float) -> bool:
+    return MINIMUM_GETAL_VOOR_OPSLAAN <= getal <= MAXIMUM_GETAL_VOOR_OPSLAAN
 
 
-def try_cast_to_integer(number: float) -> Optional[int]:
-    integer = int(number)
-    return None if abs(integer - number) > 1e-9 else integer
+def probeer_heel_getal_te_maken(getal: float) -> Optional[int]:
+    heel_getal = int(getal)
+    return None if abs(heel_getal - getal) > 1e-9 else heel_getal
 
 
-def find_new_numbers(new_number: int) -> None:
-    for number in FORMULAS:
-        try_plus(new_number, number)
-        try_minus(new_number, number)
-        try_minus(number, new_number)
-        try_times(new_number, number)
-        try_divide(new_number, number)
-        try_divide(number, new_number)
+def vind_alle_nieuwe_getallen(nieuwe_getal: int) -> None:
+    for getal in FORMULES:
+        probeer_plus(nieuwe_getal, getal)
+        probeer_min(nieuwe_getal, getal)
+        probeer_min(getal, nieuwe_getal)
+        probeer_keer(nieuwe_getal, getal)
+        probeer_delen(nieuwe_getal, getal)
+        probeer_delen(getal, nieuwe_getal)
 
 
-def get_next_number() -> int:
-    min_number_of_fours = min(NEW_NUMBER_OF_FOURS.values())
-    for number, number_of_fours in NEW_NUMBER_OF_FOURS.items():
-        if number_of_fours == min_number_of_fours:
-            return number
+def haal_nieuw_getal_op() -> int:
+    minimum_aantal_vieren = min(NIEUWE_AANTAL_VIEREN.values())
+    for getal, aantal_vieren in NIEUWE_AANTAL_VIEREN.items():
+        if aantal_vieren == minimum_aantal_vieren:
+            return getal
     raise Exception("This should not be possible!")
 
 
 def main() -> None:
-    while NEW_FORMULAS:
-        new_number = get_next_number()
-        FORMULAS[new_number] = NEW_FORMULAS.pop(new_number)
-        NUMBER_OF_FOURS[new_number] = NEW_NUMBER_OF_FOURS.pop(new_number)
-        find_new_numbers(new_number)
-    print_formulas()
+    while NIEUWE_FORMULES:
+        nieuwe_getal = haal_nieuw_getal_op()
+        FORMULES[nieuwe_getal] = NIEUWE_FORMULES.pop(nieuwe_getal)
+        AANTAL_VIEREN[nieuwe_getal] = NIEUWE_AANTAL_VIEREN.pop(nieuwe_getal)
+        vind_alle_nieuwe_getallen(nieuwe_getal)
+    print_formules()
 
 
-def print_formulas(new=False) -> None:
-    formulas = NEW_FORMULAS if new else FORMULAS
-    number_of_fours = NEW_NUMBER_OF_FOURS if new else NUMBER_OF_FOURS
-    for number in range(1, MAX_NUMBER_TO_SHOW + 1):
-        this_formula = formulas.get(number)
-        if this_formula is None:
-            this_formula = "X"
-            this_number_of_fours = MAX_NUMBER_OF_FOURS
+def print_formules(nieuw=False) -> None:
+    formules = NIEUWE_FORMULES if nieuw else FORMULES
+    aantal_vieren = NIEUWE_AANTAL_VIEREN if nieuw else AANTAL_VIEREN
+    for getal in range(1, MAXIMUM_GETAL_OM_TE_LATEN_ZIEN + 1):
+        deze_formule = formules.get(getal)
+        if deze_formule is None:
+            deze_formule = "X"
+            dit_aantal_vieren = MAXIMUM_AANTAL_VIEREN
         else:
-            this_number_of_fours = number_of_fours[number]
-        fours = "fours" if this_number_of_fours > 1 else "four"
-        print(f"{number:3} = {this_formula:40} ({this_number_of_fours} {fours})")
+            dit_aantal_vieren = aantal_vieren[getal]
+        vieren = "vieren" if dit_aantal_vieren > 1 else "vier"
+        print(f"{getal:3} = {deze_formule:40} ({dit_aantal_vieren} {vieren})")
 
 
 if __name__ == "__main__":
