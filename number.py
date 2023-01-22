@@ -62,7 +62,7 @@ def try_cast_to_integer(number: float) -> Optional[int]:
     return None if abs(integer - number) > 1e-9 else integer
 
 
-def find_new_numbers(new_number):
+def find_new_numbers(new_number: int) -> None:
     for number in FORMULAS:
         try_plus(new_number, number)
         try_minus(new_number, number)
@@ -80,7 +80,7 @@ def get_next_number() -> int:
     raise Exception("This should not be possible!")
 
 
-def main():
+def main() -> None:
     while NEW_FORMULAS:
         new_number = get_next_number()
         FORMULAS[new_number] = NEW_FORMULAS.pop(new_number)
@@ -89,7 +89,7 @@ def main():
     print_formulas()
 
 
-def print_formulas(new=False):
+def print_formulas(new=False) -> None:
     formulas = NEW_FORMULAS if new else FORMULAS
     number_of_fours = NEW_NUMBER_OF_FOURS if new else NUMBER_OF_FOURS
     for number in range(1, MAX_NUMBER_TO_SHOW + 1):
